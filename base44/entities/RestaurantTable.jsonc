@@ -1,0 +1,41 @@
+{
+  "name": "RestaurantTable",
+  "type": "object",
+  "properties": {
+    "table_number": {
+      "type": "number",
+      "title": "Table Number"
+    },
+    "capacity": {
+      "type": "number",
+      "title": "Seating Capacity",
+      "default": 4
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "available",
+        "occupied",
+        "reserved",
+        "maintenance"
+      ],
+      "default": "available"
+    },
+    "location": {
+      "type": "string",
+      "title": "Location",
+      "enum": [
+        "indoor",
+        "outdoor",
+        "bar",
+        "private"
+      ],
+      "default": "indoor"
+    }
+  },
+  "required": [
+    "table_number",
+    "capacity"
+  ]
+}

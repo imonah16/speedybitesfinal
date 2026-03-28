@@ -1,0 +1,99 @@
+{
+  "name": "Order",
+  "type": "object",
+  "properties": {
+    "order_number": {
+      "type": "string",
+      "title": "Order Number"
+    },
+    "table_id": {
+      "type": "string",
+      "title": "Table ID"
+    },
+    "table_number": {
+      "type": "number",
+      "title": "Table Number"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "pending",
+        "preparing",
+        "ready",
+        "served",
+        "cancelled"
+      ],
+      "default": "pending"
+    },
+    "items": {
+      "type": "array",
+      "title": "Order Items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "menu_item_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "subtotal": {
+      "type": "number",
+      "title": "Subtotal"
+    },
+    "tax": {
+      "type": "number",
+      "title": "Tax"
+    },
+    "total": {
+      "type": "number",
+      "title": "Total"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Order Notes"
+    },
+    "customer_name": {
+      "type": "string",
+      "title": "Customer Name"
+    },
+    "payment_status": {
+      "type": "string",
+      "title": "Payment Status",
+      "enum": [
+        "unpaid",
+        "paid",
+        "refunded"
+      ],
+      "default": "unpaid"
+    },
+    "payment_method": {
+      "type": "string",
+      "title": "Payment Method",
+      "enum": [
+        "cash",
+        "card",
+        "digital"
+      ],
+      "default": "cash"
+    }
+  },
+  "required": [
+    "order_number",
+    "items",
+    "total"
+  ]
+}

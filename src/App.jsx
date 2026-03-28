@@ -5,7 +5,14 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-// Add page imports here
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import MenuManagement from './pages/MenuManagement';
+import NewOrder from './pages/NewOrder';
+import Orders from './pages/Orders';
+import Kitchen from './pages/Kitchen';
+import Tables from './pages/Tables';
+import Analytics from './pages/Analytics';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -33,8 +40,16 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
-      <Route path="*" element={<PageNotFound />} />
+      <Route element={<Layout />}>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/menu" element={<MenuManagement />} />
+        <Route path="/new-order" element={<NewOrder />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/kitchen" element={<Kitchen />} />
+        <Route path="/tables" element={<Tables />} />
+        <Route path="/analytics" element={<Analytics />} />
+        <Route path="*" element={<PageNotFound />} />
+      </Route>
     </Routes>
   );
 };

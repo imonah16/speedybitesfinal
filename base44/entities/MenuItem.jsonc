@@ -1,0 +1,48 @@
+{
+  "name": "MenuItem",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Item Name"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "price": {
+      "type": "number",
+      "title": "Price"
+    },
+    "category_id": {
+      "type": "string",
+      "title": "Category ID"
+    },
+    "image_url": {
+      "type": "string",
+      "title": "Image URL"
+    },
+    "is_available": {
+      "type": "boolean",
+      "title": "Available",
+      "default": true
+    },
+    "preparation_time": {
+      "type": "number",
+      "title": "Prep Time (minutes)",
+      "default": 15
+    },
+    "tags": {
+      "type": "array",
+      "title": "Tags",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "name",
+    "price",
+    "category_id"
+  ]
+}
