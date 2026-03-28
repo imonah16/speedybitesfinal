@@ -1,4 +1,5 @@
 import { X, ChevronRight } from "lucide-react";
+import SplitBill from "./SplitBill";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import OrderStatusBadge from "../OrderStatusBadge";
@@ -116,6 +117,8 @@ export default function OrderDetailSheet({ order, onClose, onUpdateStatus, onUpd
               </Select>
             </div>
           </div>
+
+          <SplitBill total={order.total || 0} />
 
           {order.notes && (
             <div className="border-t pt-4">
