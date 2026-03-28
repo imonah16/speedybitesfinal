@@ -20,6 +20,7 @@ export default function NewOrder() {
   const [tableId, setTableId] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [orderNotes, setOrderNotes] = useState("");
+  const [orderType, setOrderType] = useState("dine_in");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -72,8 +73,9 @@ export default function NewOrder() {
     const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
     await base44.entities.Order.create({
       order_number: orderNumber,
-      table_id: tableId || undefined,
-      table_number: selectedTable?.table_number,
+      order_type: orderType,
+      table_id: orderType === "dine_in" ? (tableId || undefined) : undefined,
+      table_number: orderType === "dine_in" ? selectedTable?.table_number : undefined,
       status: "pending",
       items: cart,
       subtotal,
@@ -107,6 +109,30 @@ export default function NewOrder() {
       <div className="flex-1 p-6 lg:p-8 overflow-y-auto">
         <div className="max-w-4xl">
           <h1 className="font-heading text-3xl font-bold mb-6">New Order</h1>
+
+          {/* Dine In / Takeaway Toggle */}
+          <div className="flex bg-secondary rounded-xl p-1 mb-6 w-fit">
+            <button
+              onClick={() => setOrderType("dine_in")}
+              className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${
+                orderType === "dine_in"
+                  ? "bg-card shadow text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              🪑 Dine In
+            </button>
+            <button
+              onClick={() => setOrderType("takeaway")}
+              className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${
+                orderType === "takeaway"
+                  ? "bg-card shadow text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              🥡 Takeaway
+            </button>
+          </div>
 
           {/* Category Tabs */}
           <div className="flex gap-2 overflow-x-auto pb-4 mb-6">
@@ -185,22 +211,24 @@ export default function NewOrder() {
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {/* Table & Customer */}
           <div className="space-y-3">
-            <div>
-              <Label className="text-xs">Table</Label>
-              <Select value={tableId} onValueChange={setTableId}>
-                <SelectTrigger><SelectValue placeholder="Select table" /></SelectTrigger>
-                <SelectContent>
-                  {tables.map(t => (
-                    <SelectItem key={t.id} value={t.id}>
-                      Table {t.table_number} ({t.capacity} seats)
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {orderType === "dine_in" && (
+              <div>
+                <Label className="text-xs">Table</Label>
+                <Select value={tableId} onValueChange={setTableId}>
+                  <SelectTrigger><SelectValue placeholder="Select table" /></SelectTrigger>
+                  <SelectContent>
+                    {tables.map(t => (
+                      <SelectItem key={t.id} value={t.id}>
+                        Table {t.table_number} ({t.capacity} seats)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
               <Label className="text-xs">Customer Name</Label>
-              <Input value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Optional" />
+              <Input value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder={orderType === "takeaway" ? "Name for collection" : "Optional"} />
             </div>
           </div>
 

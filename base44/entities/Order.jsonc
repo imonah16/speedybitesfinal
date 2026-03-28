@@ -6,6 +6,15 @@
       "type": "string",
       "title": "Order Number"
     },
+    "order_type": {
+      "type": "string",
+      "title": "Order Type",
+      "enum": [
+        "dine_in",
+        "takeaway"
+      ],
+      "default": "dine_in"
+    },
     "table_id": {
       "type": "string",
       "title": "Table ID"

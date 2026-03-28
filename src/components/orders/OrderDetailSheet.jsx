@@ -34,7 +34,14 @@ export default function OrderDetailSheet({ order, onClose, onUpdateStatus, onUpd
           {/* Status + Info */}
           <div className="flex items-center gap-4 flex-wrap">
             <OrderStatusBadge status={order.status} />
-            {order.table_number && (
+            <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${
+              order.order_type === "takeaway"
+                ? "bg-amber-50 border-amber-200 text-amber-700"
+                : "bg-blue-50 border-blue-200 text-blue-700"
+            }`}>
+              {order.order_type === "takeaway" ? "🥡 Takeaway" : "🪑 Dine In"}
+            </span>
+            {order.order_type === "dine_in" && order.table_number && (
               <span className="text-sm text-muted-foreground">Table {order.table_number}</span>
             )}
             {order.customer_name && (
