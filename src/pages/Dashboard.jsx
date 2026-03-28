@@ -58,7 +58,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Today's Revenue"
-          value={`$${todayRevenue.toFixed(2)}`}
+          value={`£${todayRevenue.toFixed(2)}`}
           subtitle={`${todayOrders.length} orders today`}
           icon={DollarSign}
           trend="up"
@@ -152,7 +152,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="font-semibold text-sm">${(order.total || 0).toFixed(2)}</span>
+                      <span className="font-semibold text-sm">£{(order.total || 0).toFixed(2)}</span>
                       <OrderStatusBadge status={order.status} />
                     </div>
                   </div>

@@ -131,7 +131,7 @@ export default function Orders() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="font-heading font-bold hidden sm:block">${(order.total || 0).toFixed(2)}</span>
+                  <span className="font-heading font-bold hidden sm:block">£{(order.total || 0).toFixed(2)}</span>
                   <OrderStatusBadge status={order.status} />
                 </div>
               </button>

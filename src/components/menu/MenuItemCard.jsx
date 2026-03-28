@@ -26,7 +26,7 @@ export default function MenuItemCard({ item, categoryName, onEdit, onDelete, onT
             <h3 className="font-semibold">{item.name}</h3>
             <p className="text-xs text-muted-foreground">{categoryName}</p>
           </div>
-          <span className="text-lg font-heading font-bold text-primary">${item.price?.toFixed(2)}</span>
+          <span className="text-lg font-heading font-bold text-primary">£{item.price?.toFixed(2)}</span>
         </div>
         {item.description && (
           <p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>

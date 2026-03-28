@@ -157,7 +157,7 @@ export default function NewOrder() {
                         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{item.description}</p>
                       )}
                     </div>
-                    <span className="font-heading font-bold text-primary">${item.price.toFixed(2)}</span>
+                    <span className="font-heading font-bold text-primary">£{item.price.toFixed(2)}</span>
                   </div>
                   {inCart && (
                     <div className="mt-2 flex items-center justify-end">
@@ -235,7 +235,7 @@ export default function NewOrder() {
                         <Plus className="h-3 w-3" />
                       </button>
                     </div>
-                    <span className="font-semibold text-sm">${(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="font-semibold text-sm">£{(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                   <Input
                     value={item.notes}
@@ -257,10 +257,10 @@ export default function NewOrder() {
         {/* Cart Footer */}
         <div className="p-6 border-t space-y-3 bg-card">
           <div className="space-y-1 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Tax (8%)</span><span>${tax.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>£{subtotal.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Tax (8%)</span><span>£{tax.toFixed(2)}</span></div>
             <div className="flex justify-between font-heading font-bold text-lg pt-2 border-t">
-              <span>Total</span><span className="text-primary">${total.toFixed(2)}</span>
+              <span>Total</span><span className="text-primary">£{total.toFixed(2)}</span>
             </div>
           </div>
           <Button

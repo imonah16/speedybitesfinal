@@ -73,7 +73,7 @@ export default function OrderDetailSheet({ order, onClose, onUpdateStatus, onUpd
                       <p className="text-xs text-muted-foreground italic mt-0.5">{item.notes}</p>
                     )}
                   </div>
-                  <span className="text-sm font-semibold">${(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="text-sm font-semibold">£{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
             </div>
@@ -81,10 +81,10 @@ export default function OrderDetailSheet({ order, onClose, onUpdateStatus, onUpd
 
           {/* Totals */}
           <div className="border-t pt-4 space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>${(order.subtotal || 0).toFixed(2)}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Tax</span><span>${(order.tax || 0).toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>£{(order.subtotal || 0).toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Tax</span><span>£{(order.tax || 0).toFixed(2)}</span></div>
             <div className="flex justify-between font-heading font-bold text-lg pt-2 border-t">
-              <span>Total</span><span className="text-primary">${(order.total || 0).toFixed(2)}</span>
+              <span>Total</span><span className="text-primary">£{(order.total || 0).toFixed(2)}</span>
             </div>
           </div>
 
