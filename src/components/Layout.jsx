@@ -26,7 +26,7 @@ export default function Layout() {
       <aside className="hidden lg:flex flex-col w-64 bg-sidebar text-sidebar-foreground">
         <div className="p-6 border-b border-sidebar-border">
           <h1 className="font-heading text-2xl font-bold text-sidebar-primary">
-            Savora
+            SpeedyBites
           </h1>
           <p className="text-xs text-sidebar-foreground/60 mt-1 tracking-wider uppercase">
             Restaurant System
@@ -54,7 +54,7 @@ export default function Layout() {
         </nav>
         <div className="p-4 border-t border-sidebar-border">
           <div className="px-4 py-2 text-xs text-sidebar-foreground/40">
-            © 2026 Savora
+            © 2026 SpeedyBites
           </div>
         </div>
       </aside>
@@ -62,7 +62,7 @@ export default function Layout() {
       {/* Mobile Header + Overlay */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="lg:hidden flex items-center justify-between p-4 border-b bg-card">
-          <h1 className="font-heading text-xl font-bold text-primary">Savora</h1>
+          <h1 className="font-heading text-xl font-bold text-primary">SpeedyBites</h1>
           <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-lg hover:bg-secondary">
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -72,7 +72,7 @@ export default function Layout() {
           <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setMobileOpen(false)}>
             <div className="w-64 h-full bg-sidebar text-sidebar-foreground" onClick={(e) => e.stopPropagation()}>
               <div className="p-6 border-b border-sidebar-border">
-                <h1 className="font-heading text-2xl font-bold text-sidebar-primary">Savora</h1>
+                <h1 className="font-heading text-2xl font-bold text-sidebar-primary">SpeedyBites</h1>
               </div>
               <nav className="p-4 space-y-1">
                 {navItems.map((item) => {
