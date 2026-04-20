@@ -7,7 +7,7 @@ Deno.serve(async (req) => {
   try {
     const { items, orderNumber, customerName, total } = await req.json();
 
-    const origin = req.headers.get('origin') || 'http://localhost:5173';
+    const origin = 'https://speedy-bites.co.uk';
 
     const lineItems = items.map(item => ({
       price_data: {
