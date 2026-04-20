@@ -17,6 +17,8 @@ export default function PublicOrder() {
   const [cart, setCart] = useState([]);
   const [tableId, setTableId] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [orderNotes, setOrderNotes] = useState("");
   const [orderType, setOrderType] = useState("dine_in");
   const [submitting, setSubmitting] = useState(false);
@@ -74,6 +76,8 @@ export default function PublicOrder() {
       subtotal, tax, total,
       notes: orderNotes,
       customer_name: customerName,
+      customer_email: customerEmail,
+      customer_phone: customerPhone,
       payment_status: "unpaid",
       payment_method: "cash",
     });
@@ -102,7 +106,7 @@ export default function PublicOrder() {
       <p className="text-muted-foreground mb-2">We'll start preparing it right away!</p>
       <p className="text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 mb-8">💵 Please pay cash when your order is ready.</p>
       <Button onClick={() => {
-        setSubmitted(false); setCart([]); setCustomerName(""); setOrderNotes(""); setTableId("");
+        setSubmitted(false); setCart([]); setCustomerName(""); setCustomerEmail(""); setCustomerPhone(""); setOrderNotes(""); setTableId("");
       }}>
         Place Another Order
       </Button>
@@ -193,6 +197,14 @@ export default function PublicOrder() {
           <div>
             <Label className="text-xs">Your Name</Label>
             <Input value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder={orderType === "takeaway" ? "Name for collection" : "Optional"} />
+          </div>
+          <div>
+            <Label className="text-xs">Email Address</Label>
+            <Input type="email" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} placeholder="your@email.com" />
+          </div>
+          <div>
+            <Label className="text-xs">Phone Number</Label>
+            <Input type="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} placeholder="e.g. 07400 123456" />
           </div>
 
           {cart.length === 0 ? (

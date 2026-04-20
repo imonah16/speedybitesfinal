@@ -79,6 +79,14 @@
       "type": "string",
       "title": "Customer Name"
     },
+    "customer_email": {
+      "type": "string",
+      "title": "Customer Email"
+    },
+    "customer_phone": {
+      "type": "string",
+      "title": "Customer Phone"
+    },
     "payment_status": {
       "type": "string",
       "title": "Payment Status",
