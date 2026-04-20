@@ -43,7 +43,7 @@ export default function PublicLayout() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link to="/admin">
+            <Link to="/staff-login">
               <Button variant="outline" size="sm" className="hidden md:inline-flex">
                 Staff Login
               </Button>
@@ -75,7 +75,7 @@ export default function PublicLayout() {
                 {item.label}
               </Link>
             ))}
-            <Link to="/admin" onClick={() => setMobileOpen(false)}>
+            <Link to="/staff-login" onClick={() => setMobileOpen(false)}>
               <Button variant="outline" size="sm" className="w-full mt-2">Staff Login</Button>
             </Link>
           </div>
