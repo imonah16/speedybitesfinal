@@ -9,6 +9,7 @@ const navItems = [
   { path: "/menu", label: "Menu" },
   { path: "/order", label: "Order" },
   { path: "/tables", label: "Tables" },
+  { path: "/track", label: "Track Order" },
 ];
 
 export default function PublicLayout() {

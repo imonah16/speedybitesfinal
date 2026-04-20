@@ -12,6 +12,7 @@ import Home from './pages/public/Home';
 import PublicMenu from './pages/public/PublicMenu';
 import PublicOrder from './pages/public/PublicOrder';
 import PublicTables from './pages/public/PublicTables';
+import TrackOrder from './pages/public/TrackOrder';
 import StaffLogin from './pages/StaffLogin';
 
 // Admin pages
@@ -48,6 +49,7 @@ const AuthenticatedApp = () => {
         <Route path="/menu" element={<PublicMenu />} />
         <Route path="/order" element={<PublicOrder />} />
         <Route path="/tables" element={<PublicTables />} />
+        <Route path="/track" element={<TrackOrder />} />
       </Route>
 
       {/* Staff Login */}
