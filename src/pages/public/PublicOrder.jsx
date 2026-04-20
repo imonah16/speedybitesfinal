@@ -188,7 +188,7 @@ export default function PublicOrder() {
                 <SelectTrigger><SelectValue placeholder="Select table" /></SelectTrigger>
                 <SelectContent>
                   {tables.map(t => (
-                    <SelectItem key={t.id} value={t.id}>Table {t.table_number} ({t.capacity} seats)</SelectItem>
+                    <SelectItem key={t.id} value={t.id}>Table {t.table_number}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
