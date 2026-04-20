@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Minus, Plus, ShoppingCart, X, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Minus, Plus, ShoppingCart, X, ChevronRight, CheckCircle2, CreditCard, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +22,19 @@ export default function PublicOrder() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+  const [paymentCancelled, setPaymentCancelled] = useState(false);
+
+  // Check for success/cancel redirects from Stripe
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "true") {
+      setOrderNumber(params.get("order") || "");
+      setSubmitted(true);
+    }
+    if (params.get("cancelled") === "true") {
+      setPaymentCancelled(true);
+    }
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -61,8 +74,16 @@ export default function PublicOrder() {
   const selectedTable = tables.find(t => t.id === tableId);
 
   const handleSubmit = async () => {
+    // Block checkout if running inside an iframe (preview)
+    if (window.self !== window.top) {
+      alert("Payment checkout only works from the published app, not the preview.");
+      return;
+    }
+
     setSubmitting(true);
     const num = `ORD-${Date.now().toString(36).toUpperCase()}`;
+
+    // Save the order first
     await base44.entities.Order.create({
       order_number: num,
       order_type: orderType,
@@ -76,9 +97,23 @@ export default function PublicOrder() {
       payment_status: "unpaid",
     });
     if (tableId) await base44.entities.RestaurantTable.update(tableId, { status: "occupied" });
-    setOrderNumber(num);
-    setSubmitted(true);
-    setSubmitting(false);
+
+    // Create Stripe checkout session and redirect
+    const response = await base44.functions.invoke("createCheckoutSession", {
+      items: cart,
+      orderNumber: num,
+      customerName,
+      total,
+    });
+
+    if (response.data?.url) {
+      window.location.href = response.data.url;
+    } else {
+      // Fallback: show success without payment
+      setOrderNumber(num);
+      setSubmitted(true);
+      setSubmitting(false);
+    }
   };
 
   const filteredItems = selectedCategory === "all" ? items : items.filter(i => i.category_id === selectedCategory);
@@ -94,10 +129,13 @@ export default function PublicOrder() {
       <div className="h-20 w-20 rounded-full bg-emerald-100 flex items-center justify-center mb-6">
         <CheckCircle2 className="h-10 w-10 text-emerald-600" />
       </div>
-      <h2 className="font-heading text-3xl font-bold mb-2">Order Placed!</h2>
-      <p className="text-muted-foreground mb-1">Your order <span className="font-semibold text-foreground">{orderNumber}</span> has been received.</p>
+      <h2 className="font-heading text-3xl font-bold mb-2">Payment Successful!</h2>
+      <p className="text-muted-foreground mb-1">Your order <span className="font-semibold text-foreground">{orderNumber}</span> has been paid & received.</p>
       <p className="text-muted-foreground mb-8">We'll start preparing it right away!</p>
-      <Button onClick={() => { setSubmitted(false); setCart([]); setCustomerName(""); setOrderNotes(""); setTableId(""); }}>
+      <Button onClick={() => {
+        window.history.replaceState({}, '', '/order');
+        setSubmitted(false); setCart([]); setCustomerName(""); setOrderNotes(""); setTableId("");
+      }}>
         Place Another Order
       </Button>
     </div>
@@ -232,8 +270,17 @@ export default function PublicOrder() {
               <span>Total</span><span className="text-primary">£{total.toFixed(2)}</span>
             </div>
           </div>
+          {paymentCancelled && (
+            <div className="flex items-center gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              Payment was cancelled. Your order is saved — try again when ready.
+            </div>
+          )}
           <Button onClick={handleSubmit} disabled={cart.length === 0 || submitting} className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/20">
-            {submitting ? <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> : <>Place Order <ChevronRight className="h-4 w-4 ml-2" /></>}
+            {submitting
+              ? <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+              : <><CreditCard className="h-4 w-4 mr-2" /> Pay & Place Order</>
+            }
           </Button>
         </div>
       </div>
