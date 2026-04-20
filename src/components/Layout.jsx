@@ -7,13 +7,13 @@ import {
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { path: "/", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/menu", label: "Menu", icon: UtensilsCrossed },
-  { path: "/orders", label: "Orders", icon: ShoppingCart },
-  { path: "/new-order", label: "New Order", icon: ShoppingCart },
-  { path: "/kitchen", label: "Kitchen", icon: ChefHat },
-  { path: "/tables", label: "Tables", icon: Grid3X3 },
-  { path: "/analytics", label: "Analytics", icon: BarChart3 },
+  { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/admin/menu", label: "Menu", icon: UtensilsCrossed },
+  { path: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { path: "/admin/new-order", label: "New Order", icon: ShoppingCart },
+  { path: "/admin/kitchen", label: "Kitchen", icon: ChefHat },
+  { path: "/admin/tables", label: "Tables", icon: Grid3X3 },
+  { path: "/admin/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
 export default function Layout() {
@@ -34,18 +34,18 @@ export default function Layout() {
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-sidebar-primary/20"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                )}
-              >
+            const isActive = item.path === "/admin" ? location.pathname === "/admin" : location.pathname.startsWith(item.path);
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
+                        isActive
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-sidebar-primary/20"
+                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                      )}
+                    >
                 <item.icon className="h-4 w-4" />
                 {item.label}
               </Link>
@@ -76,19 +76,19 @@ export default function Layout() {
               </div>
               <nav className="p-4 space-y-1">
                 {navItems.map((item) => {
-                  const isActive = location.pathname === item.path;
+                  const isActive = item.path === "/admin" ? location.pathname === "/admin" : location.pathname.startsWith(item.path);
                   return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setMobileOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all",
-                        isActive
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent"
-                      )}
-                    >
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all",
+                      isActive
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent"
+                    )}
+                  >
                       <item.icon className="h-4 w-4" />
                       {item.label}
                     </Link>
