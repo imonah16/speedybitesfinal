@@ -87,6 +87,10 @@
       "type": "string",
       "title": "Customer Phone"
     },
+    "delivery_address": {
+      "type": "string",
+      "title": "Delivery Address"
+    },
     "payment_status": {
       "type": "string",
       "title": "Payment Status",

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Minus, Plus, ShoppingCart, X, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Minus, Plus, ShoppingCart, X, ChevronRight, CheckCircle2, Banknote, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,11 +19,27 @@ export default function PublicOrder() {
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [addressCity, setAddressCity] = useState("");
+  const [addressPostcode, setAddressPostcode] = useState("");
   const [orderNotes, setOrderNotes] = useState("");
   const [orderType, setOrderType] = useState("dine_in");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+  const [errors, setErrors] = useState({});
+
+  // Check for Stripe success/cancel redirects
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get("success");
+    const order = urlParams.get("order");
+    if (success === "true" && order) {
+      setOrderNumber(order);
+      setSubmitted(true);
+    }
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -62,30 +78,82 @@ export default function PublicOrder() {
   const total = subtotal + tax;
   const selectedTable = tables.find(t => t.id === tableId);
 
-  const handleSubmit = async () => {
+  const validate = () => {
+    const errs = {};
+    // Compulsory for both types
+    if (!customerEmail.trim()) errs.customerEmail = "Email is required";
+    if (!customerPhone.trim()) errs.customerPhone = "Phone is required";
+    // Compulsory for takeaway
+    if (orderType === "takeaway") {
+      if (!customerName.trim()) errs.customerName = "Name is required for takeaway";
+      if (!addressLine1.trim()) errs.addressLine1 = "Address line 1 is required";
+      if (!addressCity.trim()) errs.addressCity = "City is required";
+      if (!addressPostcode.trim()) errs.addressPostcode = "Postcode is required";
+    }
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const buildOrderData = (num, paymentMethod) => ({
+    order_number: num,
+    order_type: orderType,
+    table_id: orderType === "dine_in" ? (tableId || undefined) : undefined,
+    table_number: orderType === "dine_in" ? selectedTable?.table_number : undefined,
+    status: "pending",
+    items: cart,
+    subtotal, tax, total,
+    notes: orderNotes,
+    customer_name: customerName,
+    customer_email: customerEmail,
+    customer_phone: customerPhone,
+    delivery_address: orderType === "takeaway"
+      ? [addressLine1, addressLine2, addressCity, addressPostcode].filter(Boolean).join(", ")
+      : undefined,
+    payment_status: "unpaid",
+    payment_method: paymentMethod,
+  });
+
+  const handleCash = async () => {
+    if (!validate()) return;
     setSubmitting(true);
     const num = `ORD-${Date.now().toString(36).toUpperCase()}`;
-
-    await base44.entities.Order.create({
-      order_number: num,
-      order_type: orderType,
-      table_id: orderType === "dine_in" ? (tableId || undefined) : undefined,
-      table_number: orderType === "dine_in" ? selectedTable?.table_number : undefined,
-      status: "pending",
-      items: cart,
-      subtotal, tax, total,
-      notes: orderNotes,
-      customer_name: customerName,
-      customer_email: customerEmail,
-      customer_phone: customerPhone,
-      payment_status: "unpaid",
-      payment_method: "cash",
-    });
+    await base44.entities.Order.create(buildOrderData(num, "cash"));
     if (tableId) await base44.entities.RestaurantTable.update(tableId, { status: "occupied" });
-
     setOrderNumber(num);
     setSubmitted(true);
     setSubmitting(false);
+  };
+
+  const handleCard = async () => {
+    if (!validate()) return;
+    // Block inside iframe (Base44 preview)
+    if (window.self !== window.top) {
+      alert("Card payment only works from the published app, not the preview.");
+      return;
+    }
+    setSubmitting(true);
+    const num = `ORD-${Date.now().toString(36).toUpperCase()}`;
+    // Create the order first so it exists when Stripe redirects back
+    await base44.entities.Order.create(buildOrderData(num, "card"));
+    if (tableId) await base44.entities.RestaurantTable.update(tableId, { status: "occupied" });
+
+    const response = await base44.functions.invoke("createCheckoutSession", {
+      items: cart,
+      orderNumber: num,
+      customerName,
+      total,
+    });
+    const { url } = response.data;
+    window.location.href = url;
+  };
+
+  const resetForm = () => {
+    setSubmitted(false); setCart([]); setCustomerName(""); setCustomerEmail("");
+    setCustomerPhone(""); setOrderNotes(""); setTableId("");
+    setAddressLine1(""); setAddressLine2(""); setAddressCity(""); setAddressPostcode("");
+    setErrors({});
+    // Clear URL params
+    window.history.replaceState({}, "", "/order");
   };
 
   const filteredItems = selectedCategory === "all" ? items : items.filter(i => i.category_id === selectedCategory);
@@ -104,15 +172,10 @@ export default function PublicOrder() {
       <h2 className="font-heading text-3xl font-bold mb-2">Order Received!</h2>
       <p className="text-muted-foreground mb-1">Your order <span className="font-semibold text-foreground">{orderNumber}</span> has been placed.</p>
       <p className="text-muted-foreground mb-4">We'll start preparing it right away!</p>
-      <p className="text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 mb-6">💵 Please pay cash when your order is ready.</p>
       <a href={`/track?order=${orderNumber}`}>
         <Button variant="outline" className="mb-3 w-full">Track My Order →</Button>
       </a>
-      <Button variant="ghost" onClick={() => {
-        setSubmitted(false); setCart([]); setCustomerName(""); setCustomerEmail(""); setCustomerPhone(""); setOrderNotes(""); setTableId("");
-      }}>
-        Place Another Order
-      </Button>
+      <Button variant="ghost" onClick={resetForm}>Place Another Order</Button>
     </div>
   );
 
@@ -126,7 +189,7 @@ export default function PublicOrder() {
           {/* Order Type Toggle */}
           <div className="flex bg-secondary rounded-xl p-1 mb-6 w-fit">
             {[["dine_in", "🪑 Dine In"], ["takeaway", "🥡 Takeaway"]].map(([val, label]) => (
-              <button key={val} onClick={() => setOrderType(val)}
+              <button key={val} onClick={() => { setOrderType(val); setErrors({}); }}
                 className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${orderType === val ? "bg-card shadow text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
                 {label}
               </button>
@@ -197,18 +260,65 @@ export default function PublicOrder() {
               </Select>
             </div>
           )}
+
+          {/* Name */}
           <div>
-            <Label className="text-xs">Your Name</Label>
-            <Input value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder={orderType === "takeaway" ? "Name for collection" : "Optional"} />
+            <Label className="text-xs">Your Name {orderType === "takeaway" && <span className="text-destructive">*</span>}</Label>
+            <Input value={customerName} onChange={e => setCustomerName(e.target.value)}
+              placeholder={orderType === "takeaway" ? "Name for collection" : "Optional"}
+              className={errors.customerName ? "border-destructive" : ""} />
+            {errors.customerName && <p className="text-xs text-destructive mt-1">{errors.customerName}</p>}
           </div>
+
+          {/* Email */}
           <div>
-            <Label className="text-xs">Email Address</Label>
-            <Input type="email" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} placeholder="your@email.com" />
+            <Label className="text-xs">Email Address <span className="text-destructive">*</span></Label>
+            <Input type="email" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)}
+              placeholder="your@email.com"
+              className={errors.customerEmail ? "border-destructive" : ""} />
+            {errors.customerEmail && <p className="text-xs text-destructive mt-1">{errors.customerEmail}</p>}
           </div>
+
+          {/* Phone */}
           <div>
-            <Label className="text-xs">Phone Number</Label>
-            <Input type="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} placeholder="e.g. 07400 123456" />
+            <Label className="text-xs">Phone Number <span className="text-destructive">*</span></Label>
+            <Input type="tel" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)}
+              placeholder="e.g. 07400 123456"
+              className={errors.customerPhone ? "border-destructive" : ""} />
+            {errors.customerPhone && <p className="text-xs text-destructive mt-1">{errors.customerPhone}</p>}
           </div>
+
+          {/* Delivery Address — takeaway only */}
+          {orderType === "takeaway" && (
+            <div className="space-y-3 pt-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Delivery Address</p>
+              <div>
+                <Label className="text-xs">Address Line 1 <span className="text-destructive">*</span></Label>
+                <Input value={addressLine1} onChange={e => setAddressLine1(e.target.value)}
+                  placeholder="House number & street"
+                  className={errors.addressLine1 ? "border-destructive" : ""} />
+                {errors.addressLine1 && <p className="text-xs text-destructive mt-1">{errors.addressLine1}</p>}
+              </div>
+              <div>
+                <Label className="text-xs">Address Line 2</Label>
+                <Input value={addressLine2} onChange={e => setAddressLine2(e.target.value)} placeholder="Apartment, flat, etc. (optional)" />
+              </div>
+              <div>
+                <Label className="text-xs">City <span className="text-destructive">*</span></Label>
+                <Input value={addressCity} onChange={e => setAddressCity(e.target.value)}
+                  placeholder="City"
+                  className={errors.addressCity ? "border-destructive" : ""} />
+                {errors.addressCity && <p className="text-xs text-destructive mt-1">{errors.addressCity}</p>}
+              </div>
+              <div>
+                <Label className="text-xs">Postcode <span className="text-destructive">*</span></Label>
+                <Input value={addressPostcode} onChange={e => setAddressPostcode(e.target.value)}
+                  placeholder="e.g. SW1A 1AA"
+                  className={errors.addressPostcode ? "border-destructive" : ""} />
+                {errors.addressPostcode && <p className="text-xs text-destructive mt-1">{errors.addressPostcode}</p>}
+              </div>
+            </div>
+          )}
 
           {cart.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground text-sm">Tap items to add them to your order</div>
@@ -253,12 +363,35 @@ export default function PublicOrder() {
               <span>Total</span><span className="text-primary">£{total.toFixed(2)}</span>
             </div>
           </div>
-          <Button onClick={handleSubmit} disabled={cart.length === 0 || submitting} className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/20">
-            {submitting
-              ? <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-              : <><ChevronRight className="h-4 w-4 mr-2" /> Place Order (Pay Cash)</>
-            }
-          </Button>
+
+          {/* Two payment buttons */}
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              onClick={handleCash}
+              disabled={cart.length === 0 || submitting}
+              variant="outline"
+              className="h-12 font-semibold border-2 flex flex-col gap-0.5 py-2"
+            >
+              {submitting ? <div className="w-4 h-4 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" /> : (
+                <>
+                  <Banknote className="h-4 w-4" />
+                  <span className="text-xs">Pay Cash</span>
+                </>
+              )}
+            </Button>
+            <Button
+              onClick={handleCard}
+              disabled={cart.length === 0 || submitting}
+              className="h-12 font-semibold shadow-lg shadow-primary/20 flex flex-col gap-0.5 py-2"
+            >
+              {submitting ? <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> : (
+                <>
+                  <CreditCard className="h-4 w-4" />
+                  <span className="text-xs">Pay by Card</span>
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
