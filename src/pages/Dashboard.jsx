@@ -60,6 +60,7 @@ export default function Dashboard() {
           title="Today's Revenue"
           value={`£${todayRevenue.toFixed(2)}`}
           subtitle={`${todayOrders.length} orders today`}
+
           icon={DollarSign}
           trend="up"
         />

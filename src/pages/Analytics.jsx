@@ -81,13 +81,14 @@ export default function Analytics() {
       <div>
         <h1 className="font-heading text-3xl lg:text-4xl font-bold">Analytics</h1>
         <p className="text-muted-foreground mt-1">Business insights and performance metrics</p>
+
       </div>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Total Revenue" value={`£${totalRevenue.toFixed(2)}`} icon={DollarSign} trend="up" />
         <StatCard title="Total Orders" value={validOrders.length} icon={ShoppingCart} />
-        <StatCard title="Avg Order Value" value={`£${avgOrderValue.toFixed(2)}`} icon={TrendingUp} />
+        <StatCard title="Avg. Order Value" value={`£${avgOrderValue.toFixed(2)}`} icon={TrendingUp} />
         <StatCard title="Items Sold" value={Object.values(itemCounts).reduce((s, i) => s + i.quantity, 0)} icon={BarChart3} />
       </div>
 

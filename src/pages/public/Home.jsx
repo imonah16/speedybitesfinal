@@ -54,7 +54,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { icon: "⚡", title: "Lightning Fast", desc: "Your food prepared and served quickly, every single time.", color: "from-amber-100 to-yellow-50", border: "border-amber-200" },
-              { icon: "🍲", title: "Cozy Comfort Food", desc: "Every dish crafted with fresh, quality ingredients and a whole lot of love.", color: "from-orange-100 to-amber-50", border: "border-orange-200" },
+              { icon: "🍲", title: "Cosy Comfort Food", desc: "Every dish crafted with fresh, quality ingredients and a whole lot of love.", color: "from-orange-100 to-amber-50", border: "border-orange-200" },
               { icon: "📱", title: "Easy Ordering", desc: "Browse the full menu and place your order right from your phone.", color: "from-rose-100 to-pink-50", border: "border-rose-200" },
             ].map(f => (
               <div key={f.title} className={`text-center p-7 bg-gradient-to-br ${f.color} border ${f.border} rounded-3xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1`}>

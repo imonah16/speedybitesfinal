@@ -301,7 +301,7 @@ export default function PublicOrder() {
               </div>
               <div>
                 <Label className="text-xs">Address Line 2</Label>
-                <Input value={addressLine2} onChange={e => setAddressLine2(e.target.value)} placeholder="Apartment, flat, etc. (optional)" />
+                <Input value={addressLine2} onChange={e => setAddressLine2(e.target.value)} placeholder="Flat, apartment, etc. (optional)" />
               </div>
               <div>
                 <Label className="text-xs">City <span className="text-destructive">*</span></Label>

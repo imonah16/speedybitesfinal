@@ -222,7 +222,7 @@ export default function Kitchen() {
             <CheckCircle2 className="h-10 w-10 text-emerald-500" />
           </div>
           <h3 className="font-heading text-xl font-semibold mb-1">Kitchen is clear!</h3>
-          <p className="text-muted-foreground text-sm">New orders will appear here in real-time.</p>
+          <p className="text-muted-foreground text-sm">New orders will appear here in real time.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
