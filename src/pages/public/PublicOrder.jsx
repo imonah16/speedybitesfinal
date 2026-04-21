@@ -103,9 +103,12 @@ export default function PublicOrder() {
       </div>
       <h2 className="font-heading text-3xl font-bold mb-2">Order Received!</h2>
       <p className="text-muted-foreground mb-1">Your order <span className="font-semibold text-foreground">{orderNumber}</span> has been placed.</p>
-      <p className="text-muted-foreground mb-2">We'll start preparing it right away!</p>
-      <p className="text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 mb-8">💵 Please pay cash when your order is ready.</p>
-      <Button onClick={() => {
+      <p className="text-muted-foreground mb-4">We'll start preparing it right away!</p>
+      <p className="text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 mb-6">💵 Please pay cash when your order is ready.</p>
+      <a href={`/track?order=${orderNumber}`}>
+        <Button variant="outline" className="mb-3 w-full">Track My Order →</Button>
+      </a>
+      <Button variant="ghost" onClick={() => {
         setSubmitted(false); setCart([]); setCustomerName(""); setCustomerEmail(""); setCustomerPhone(""); setOrderNotes(""); setTableId("");
       }}>
         Place Another Order

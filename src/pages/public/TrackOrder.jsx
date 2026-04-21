@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Search, Clock, ChefHat, Bell, CheckCircle2, XCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -16,25 +16,42 @@ const steps = [
 const stepIndex = (status) => steps.findIndex(s => s.key === status);
 
 export default function TrackOrder() {
-  const [query, setQuery] = useState("");
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlOrder = urlParams.get("order") || "";
+  const [query, setQuery] = useState(urlOrder);
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  const fetchOrder = async (orderNum) => {
+    const num = (orderNum || query).trim().toUpperCase();
+    if (!num) return;
     setLoading(true);
     setError("");
-    setOrder(null);
-
-    const results = await base44.entities.Order.filter({ order_number: query.trim().toUpperCase() });
+    const results = await base44.entities.Order.filter({ order_number: num });
     if (results.length === 0) {
       setError("No order found with that number. Please check and try again.");
+      setOrder(null);
     } else {
       setOrder(results[0]);
     }
     setLoading(false);
+  };
+
+  useEffect(() => {
+    if (urlOrder) fetchOrder(urlOrder);
+  }, []);
+
+  useEffect(() => {
+    if (!order) return;
+    if (order.status === "served" || order.status === "cancelled") return;
+    const interval = setInterval(() => fetchOrder(order.order_number), 15000);
+    return () => clearInterval(interval);
+  }, [order]);
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    fetchOrder(query);
   };
 
   const currentStep = order ? stepIndex(order.status) : -1;
