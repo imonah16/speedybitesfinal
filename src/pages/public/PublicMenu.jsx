@@ -22,7 +22,13 @@ export default function PublicMenu() {
     });
   }, []);
 
-  const filtered = selected === "all" ? items : items.filter(i => i.category_id === selected);
+  const filtered = selected === "all"
+    ? [...items].sort((a, b) => {
+        const catA = categories.findIndex(c => c.id === a.category_id);
+        const catB = categories.findIndex(c => c.id === b.category_id);
+        return catA - catB;
+      })
+    : items.filter(i => i.category_id === selected);
 
   if (loading) return (
     <div className="flex items-center justify-center py-24">
