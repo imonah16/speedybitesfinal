@@ -25,7 +25,8 @@ export default function PublicOrder() {
   const [addressPostcode, setAddressPostcode] = useState("");
   const [orderNotes, setOrderNotes] = useState("");
   const [orderType, setOrderType] = useState("dine_in");
-  const [submitting, setSubmitting] = useState(false);
+  const [submittingCash, setSubmittingCash] = useState(false);
+  const [submittingCard, setSubmittingCard] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [errors, setErrors] = useState({});
@@ -115,13 +116,13 @@ export default function PublicOrder() {
 
   const handleCash = async () => {
     if (!validate()) return;
-    setSubmitting(true);
+    setSubmittingCash(true);
     const num = `ORD-${Date.now().toString(36).toUpperCase()}`;
     await base44.entities.Order.create(buildOrderData(num, "cash"));
     if (tableId) await base44.entities.RestaurantTable.update(tableId, { status: "occupied" });
     setOrderNumber(num);
     setSubmitted(true);
-    setSubmitting(false);
+    setSubmittingCash(false);
   };
 
   const handleCard = async () => {
@@ -131,7 +132,7 @@ export default function PublicOrder() {
       alert("Card payment only works from the published app, not the preview.");
       return;
     }
-    setSubmitting(true);
+    setSubmittingCard(true);
     const num = `ORD-${Date.now().toString(36).toUpperCase()}`;
     // Create the order first so it exists when Stripe redirects back
     await base44.entities.Order.create(buildOrderData(num, "card"));
@@ -368,11 +369,11 @@ export default function PublicOrder() {
           <div className="grid grid-cols-2 gap-2">
             <Button
               onClick={handleCash}
-              disabled={cart.length === 0 || submitting}
+              disabled={cart.length === 0 || submittingCash || submittingCard}
               variant="outline"
               className="h-12 font-semibold border-2 flex flex-col gap-0.5 py-2"
             >
-              {submitting ? <div className="w-4 h-4 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" /> : (
+              {submittingCash ? <div className="w-4 h-4 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" /> : (
                 <>
                   <Banknote className="h-4 w-4" />
                   <span className="text-xs">Pay Cash</span>
@@ -381,10 +382,10 @@ export default function PublicOrder() {
             </Button>
             <Button
               onClick={handleCard}
-              disabled={cart.length === 0 || submitting}
+              disabled={cart.length === 0 || submittingCash || submittingCard}
               className="h-12 font-semibold shadow-lg shadow-primary/20 flex flex-col gap-0.5 py-2"
             >
-              {submitting ? <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> : (
+              {submittingCard ? <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /> : (
                 <>
                   <CreditCard className="h-4 w-4" />
                   <span className="text-xs">Pay by Card</span>
