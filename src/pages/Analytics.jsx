@@ -104,7 +104,7 @@ export default function Analytics() {
               <YAxis fontSize={12} tick={{ fill: "hsl(20, 10%, 45%)" }} />
               <Tooltip
                 contentStyle={{ borderRadius: "12px", border: "1px solid hsl(30, 15%, 88%)", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
-                formatter={(value) => [`£${value.toFixed(2)}`, "Revenue"]}
+                formatter={(value) => [`££{value.toFixed(2)}`, "Revenue"]}
               />
               <Bar dataKey="revenue" fill="hsl(24, 70%, 45%)" radius={[6, 6, 0, 0]} />
             </BarChart>
