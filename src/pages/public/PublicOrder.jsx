@@ -5,14 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 export default function PublicOrder() {
   const [categories, setCategories] = useState([]);
   const [items, setItems] = useState([]);
+  const [tables, setTables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [cart, setCart] = useState([]);
+  const [tableId, setTableId] = useState("");
+  const [orderType, setOrderType] = useState("dine_in");
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -38,9 +42,11 @@ export default function PublicOrder() {
     Promise.all([
       base44.entities.MenuCategory.list("sort_order"),
       base44.entities.MenuItem.list("name"),
-    ]).then(([cats, menuItems]) => {
+      base44.entities.RestaurantTable.list("table_number"),
+    ]).then(([cats, menuItems, tableData]) => {
       setCategories(cats.filter(c => c.is_active !== false));
       setItems(menuItems.filter(i => i.is_available !== false));
+      setTables(tableData.filter(t => t.status === "available"));
       setLoading(false);
     });
   }, []);
@@ -67,6 +73,7 @@ export default function PublicOrder() {
   const subtotal = cart.reduce((sum, c) => sum + c.price * c.quantity, 0);
   const tax = subtotal * 0.08;
   const total = subtotal + tax;
+  const selectedTable = tables.find(t => t.id === tableId);
 
   const validate = () => {
     const errs = {};
@@ -79,7 +86,9 @@ export default function PublicOrder() {
 
   const buildOrderData = (num, paymentMethod) => ({
     order_number: num,
-    order_type: "takeaway",
+    order_type: orderType,
+    table_id: orderType === "dine_in" ? (tableId || undefined) : undefined,
+    table_number: orderType === "dine_in" ? selectedTable?.table_number : undefined,
     status: "pending",
     items: cart,
     subtotal, tax, total,
@@ -96,6 +105,7 @@ export default function PublicOrder() {
     setSubmittingCash(true);
     const num = `ORD-${Date.now().toString(36).toUpperCase()}`;
     await base44.entities.Order.create(buildOrderData(num, "cash"));
+    if (tableId) await base44.entities.RestaurantTable.update(tableId, { status: "occupied" });
     setOrderNumber(num);
     setSubmitted(true);
     setSubmittingCash(false);
@@ -112,6 +122,7 @@ export default function PublicOrder() {
     const num = `ORD-${Date.now().toString(36).toUpperCase()}`;
     // Create the order first so it exists when Stripe redirects back
     await base44.entities.Order.create(buildOrderData(num, "card"));
+    if (tableId) await base44.entities.RestaurantTable.update(tableId, { status: "occupied" });
 
     const response = await base44.functions.invoke("createCheckoutSession", {
       items: cart,
@@ -125,7 +136,7 @@ export default function PublicOrder() {
 
   const resetForm = () => {
     setSubmitted(false); setCart([]); setCustomerName(""); setCustomerEmail("");
-    setCustomerPhone(""); setOrderNotes("");
+    setCustomerPhone(""); setOrderNotes(""); setTableId("");
     setErrors({});
     window.history.replaceState({}, "", "/order");
   };
@@ -145,7 +156,7 @@ export default function PublicOrder() {
       </div>
       <h2 className="font-heading text-3xl font-bold mb-2">Order Received!</h2>
       <p className="text-muted-foreground mb-1">Your order <span className="font-semibold text-foreground">{orderNumber}</span> has been placed.</p>
-      <p className="text-muted-foreground mb-4">Come collect when it's ready — we'll start preparing it right away!</p>
+      <p className="text-muted-foreground mb-4">We'll start preparing it right away!</p>
       <a href={`/track?order=${orderNumber}`}>
         <Button variant="outline" className="mb-3 w-full">Track My Order →</Button>
       </a>
@@ -158,7 +169,17 @@ export default function PublicOrder() {
       {/* Menu Side */}
       <div className="flex-1 p-6 lg:p-8 overflow-y-auto">
         <div className="max-w-3xl mx-auto">
-          <h1 className="font-heading text-3xl font-bold mb-6">Place a Collection Order</h1>
+          <h1 className="font-heading text-3xl font-bold mb-6">Place an Order</h1>
+
+          {/* Order Type Toggle */}
+          <div className="flex bg-secondary rounded-xl p-1 mb-6 w-fit">
+            {[["dine_in", "🪑 Dine In"], ["takeaway", "🥡 Collection"]].map(([val, label]) => (
+              <button key={val} onClick={() => { setOrderType(val); setErrors({}); }}
+                className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${orderType === val ? "bg-card shadow text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+                {label}
+              </button>
+            ))}
+          </div>
 
           {/* Categories */}
           <div className="flex gap-2 overflow-x-auto pb-3 mb-5">
@@ -211,11 +232,25 @@ export default function PublicOrder() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {orderType === "dine_in" && (
+            <div>
+              <Label className="text-xs">Table</Label>
+              <Select value={tableId} onValueChange={setTableId}>
+                <SelectTrigger><SelectValue placeholder="Select table" /></SelectTrigger>
+                <SelectContent>
+                  {tables.map(t => (
+                    <SelectItem key={t.id} value={t.id}>Table {t.table_number}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           {/* Name */}
           <div>
             <Label className="text-xs">Your Name <span className="text-destructive">*</span></Label>
             <Input value={customerName} onChange={e => setCustomerName(e.target.value)}
-              placeholder="Name for collection"
+              placeholder={orderType === "takeaway" ? "Name for collection" : "Optional"}
               className={errors.customerName ? "border-destructive" : ""} />
             {errors.customerName && <p className="text-xs text-destructive mt-1">{errors.customerName}</p>}
           </div>
