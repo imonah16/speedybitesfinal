@@ -31,8 +31,8 @@ export default function PublicOrder() {
   const [promoError, setPromoError] = useState("");
 
   const PROMO_CODES = {
-    "NHS10": { label: "NHS Discount (10%)", rate: 0.10 },
-    "STUDENT15": { label: "Student Discount (15%)", rate: 0.15 },
+    "NHS15": { label: "NHS Discount (15%)", rate: 0.15 },
+    "STUDENT10": { label: "Student Discount (10%)", rate: 0.10 },
   };
 
   const applyPromo = () => {
@@ -41,7 +41,7 @@ export default function PublicOrder() {
       setAppliedDiscount(PROMO_CODES[code]);
       setPromoError("");
     } else {
-      setPromoError("Invalid promo code. Try NHS10 or STUDENT15.");
+      setPromoError("Invalid promo code. Try NHS15 or STUDENT10.");
       setAppliedDiscount(null);
     }
   };
@@ -351,7 +351,7 @@ export default function PublicOrder() {
                   value={promoCode}
                   onChange={e => { setPromoCode(e.target.value); setPromoError(""); }}
                   onKeyDown={e => e.key === "Enter" && applyPromo()}
-                  placeholder="e.g. NHS10 or STUDENT15"
+                  placeholder="e.g. NHS15 or STUDENT10"
                   className={promoError ? "border-destructive" : ""}
                 />
                 <Button type="button" variant="outline" size="sm" onClick={applyPromo} className="shrink-0">Apply</Button>
