@@ -29,6 +29,7 @@ export default function PublicOrder() {
   const [promoCode, setPromoCode] = useState("");
   const [appliedDiscount, setAppliedDiscount] = useState(null); // { label, rate }
   const [promoError, setPromoError] = useState("");
+  const [estimatedWait, setEstimatedWait] = useState(0);
 
   const PROMO_CODES = {
     "NHS15": { label: "NHS Discount (15%)", rate: 0.15 },
@@ -127,12 +128,22 @@ export default function PublicOrder() {
     payment_method: paymentMethod,
   });
 
+  const calcWaitTime = () => {
+    const maxPrepTime = Math.max(...cart.map(c => {
+      const menuItem = items.find(i => i.id === c.menu_item_id);
+      return menuItem?.preparation_time || 15;
+    }));
+    return maxPrepTime;
+  };
+
   const handleCash = async () => {
     if (!validate()) return;
     setSubmittingCash(true);
     const num = `ORD-${Date.now().toString(36).toUpperCase()}`;
+    const wait = calcWaitTime();
     await base44.entities.Order.create(buildOrderData(num, "cash"));
     if (tableId) await base44.entities.RestaurantTable.update(tableId, { status: "occupied" });
+    setEstimatedWait(wait);
     setOrderNumber(num);
     setSubmitted(true);
     setSubmittingCash(false);
@@ -148,8 +159,10 @@ export default function PublicOrder() {
     setSubmittingCard(true);
     const num = `ORD-${Date.now().toString(36).toUpperCase()}`;
     // Create the order first so it exists when Stripe redirects back
+    const wait = calcWaitTime();
     await base44.entities.Order.create(buildOrderData(num, "card"));
     if (tableId) await base44.entities.RestaurantTable.update(tableId, { status: "occupied" });
+    setEstimatedWait(wait);
 
     const response = await base44.functions.invoke("createCheckoutSession", {
       items: cart,
@@ -164,7 +177,7 @@ export default function PublicOrder() {
   const resetForm = () => {
     setSubmitted(false); setCart([]); setCustomerName(""); setCustomerEmail("");
     setCustomerPhone(""); setOrderNotes(""); setTableId("");
-    setErrors({}); setPromoCode(""); setAppliedDiscount(null); setPromoError("");
+    setErrors({}); setPromoCode(""); setAppliedDiscount(null); setPromoError(""); setEstimatedWait(0);
     window.history.replaceState({}, "", "/order");
   };
 
@@ -183,7 +196,14 @@ export default function PublicOrder() {
       </div>
       <h2 className="font-heading text-3xl font-bold mb-2">Order Received!</h2>
       <p className="text-muted-foreground mb-1">Your order <span className="font-semibold text-foreground">{orderNumber}</span> has been placed.</p>
-      <p className="text-muted-foreground mb-4">We'll start preparing it right away!</p>
+      <p className="text-muted-foreground mb-3">We'll start preparing it right away!</p>
+      <div className="bg-amber-50 border border-amber-200 rounded-xl px-6 py-3 mb-4 flex items-center gap-3">
+        <span className="text-2xl">⏱️</span>
+        <div className="text-left">
+          <p className="font-semibold text-amber-800 text-sm">Estimated Wait Time</p>
+          <p className="text-amber-700 font-bold text-lg">~{estimatedWait} minutes</p>
+        </div>
+      </div>
       <a href={`/track?order=${orderNumber}`}>
         <Button variant="outline" className="mb-3 w-full">Track My Order →</Button>
       </a>
