@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { BarChart3, TrendingUp, DollarSign, ShoppingCart } from "lucide-react";
+import { BarChart3, TrendingUp, PoundSterling, ShoppingCart } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 import StatCard from "../components/StatCard";
 import { format, subDays, startOfDay, isAfter } from "date-fns";
@@ -86,7 +86,7 @@ export default function Analytics() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Revenue" value={`£${totalRevenue.toFixed(2)}`} icon={DollarSign} trend="up" />
+        <StatCard title="Total Revenue" value={`£${totalRevenue.toFixed(2)}`} icon={PoundSterling} trend="up" />
         <StatCard title="Total Orders" value={validOrders.length} icon={ShoppingCart} />
         <StatCard title="Avg. Order Value" value={`£${avgOrderValue.toFixed(2)}`} icon={TrendingUp} />
         <StatCard title="Items Sold" value={Object.values(itemCounts).reduce((s, i) => s + i.quantity, 0)} icon={BarChart3} />
@@ -104,7 +104,7 @@ export default function Analytics() {
               <YAxis fontSize={12} tick={{ fill: "hsl(20, 10%, 45%)" }} />
               <Tooltip
                 contentStyle={{ borderRadius: "12px", border: "1px solid hsl(30, 15%, 88%)", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
-                formatter={(value) => [`££{value.toFixed(2)}`, "Revenue"]}
+                formatter={(value) => [`£${value.toFixed(2)}`, "Revenue"]}
               />
               <Bar dataKey="revenue" fill="hsl(24, 70%, 45%)" radius={[6, 6, 0, 0]} />
             </BarChart>
