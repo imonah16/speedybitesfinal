@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Minus, Plus, ShoppingCart, X, CheckCircle2, Banknote, CreditCard } from "lucide-react";
+import { Minus, Plus, ShoppingCart, X, CheckCircle2, Banknote, CreditCard, Tag, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,31 @@ export default function PublicOrder() {
   const [submitted, setSubmitted] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [errors, setErrors] = useState({});
+  const [promoCode, setPromoCode] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState(null); // { label, rate }
+  const [promoError, setPromoError] = useState("");
+
+  const PROMO_CODES = {
+    "NHS10": { label: "NHS Discount (10%)", rate: 0.10 },
+    "STUDENT15": { label: "Student Discount (15%)", rate: 0.15 },
+  };
+
+  const applyPromo = () => {
+    const code = promoCode.trim().toUpperCase();
+    if (PROMO_CODES[code]) {
+      setAppliedDiscount(PROMO_CODES[code]);
+      setPromoError("");
+    } else {
+      setPromoError("Invalid promo code. Try NHS10 or STUDENT15.");
+      setAppliedDiscount(null);
+    }
+  };
+
+  const removePromo = () => {
+    setAppliedDiscount(null);
+    setPromoCode("");
+    setPromoError("");
+  };
 
   // Check for Stripe success/cancel redirects
   useEffect(() => {
@@ -71,8 +96,10 @@ export default function PublicOrder() {
   };
 
   const subtotal = cart.reduce((sum, c) => sum + c.price * c.quantity, 0);
-  const tax = subtotal * 0.08;
-  const total = subtotal + tax;
+  const discountAmount = appliedDiscount ? subtotal * appliedDiscount.rate : 0;
+  const discountedSubtotal = subtotal - discountAmount;
+  const tax = discountedSubtotal * 0.08;
+  const total = discountedSubtotal + tax;
   const selectedTable = tables.find(t => t.id === tableId);
 
   const validate = () => {
@@ -91,8 +118,8 @@ export default function PublicOrder() {
     table_number: orderType === "dine_in" ? selectedTable?.table_number : undefined,
     status: "pending",
     items: cart,
-    subtotal, tax, total,
-    notes: orderNotes,
+    subtotal: discountedSubtotal, tax, total,
+    notes: orderNotes + (appliedDiscount ? ` [${appliedDiscount.label}]` : ""),
     customer_name: customerName,
     customer_email: customerEmail,
     customer_phone: customerPhone,
@@ -137,7 +164,7 @@ export default function PublicOrder() {
   const resetForm = () => {
     setSubmitted(false); setCart([]); setCustomerName(""); setCustomerEmail("");
     setCustomerPhone(""); setOrderNotes(""); setTableId("");
-    setErrors({});
+    setErrors({}); setPromoCode(""); setAppliedDiscount(null); setPromoError("");
     window.history.replaceState({}, "", "/order");
   };
 
@@ -306,11 +333,43 @@ export default function PublicOrder() {
             <Label className="text-xs">Special Requests</Label>
             <Textarea value={orderNotes} onChange={e => setOrderNotes(e.target.value)} placeholder="Any allergies or special requests..." rows={2} />
           </div>
+
+          {/* Promo Code */}
+          <div>
+            <Label className="text-xs flex items-center gap-1"><Tag className="h-3 w-3" /> Promo Code</Label>
+            {appliedDiscount ? (
+              <div className="flex items-center justify-between mt-1 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span className="text-sm text-emerald-700 font-medium">{appliedDiscount.label}</span>
+                </div>
+                <button onClick={removePromo} className="text-xs text-muted-foreground hover:text-destructive underline">Remove</button>
+              </div>
+            ) : (
+              <div className="flex gap-2 mt-1">
+                <Input
+                  value={promoCode}
+                  onChange={e => { setPromoCode(e.target.value); setPromoError(""); }}
+                  onKeyDown={e => e.key === "Enter" && applyPromo()}
+                  placeholder="e.g. NHS10 or STUDENT15"
+                  className={promoError ? "border-destructive" : ""}
+                />
+                <Button type="button" variant="outline" size="sm" onClick={applyPromo} className="shrink-0">Apply</Button>
+              </div>
+            )}
+            {promoError && <p className="text-xs text-destructive mt-1">{promoError}</p>}
+          </div>
         </div>
 
         <div className="p-6 border-t space-y-3 bg-card">
           <div className="space-y-1 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>£{subtotal.toFixed(2)}</span></div>
+            {appliedDiscount && (
+              <div className="flex justify-between text-emerald-600">
+                <span>{appliedDiscount.label}</span>
+                <span>-£{discountAmount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between"><span className="text-muted-foreground">Tax (8%)</span><span>£{tax.toFixed(2)}</span></div>
             <div className="flex justify-between font-heading font-bold text-lg pt-2 border-t">
               <span>Total</span><span className="text-primary">£{total.toFixed(2)}</span>
