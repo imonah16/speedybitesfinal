@@ -252,7 +252,7 @@ export default function Kitchen() {
 
           {/* Ready Column */}
           <div>
-            <SectionHeader label="Ready to Serve" count={ready.length} color="text-emerald-600" dot="bg-emerald-400" />
+            <SectionHeader label="Ready for Collection" count={ready.length} color="text-emerald-600" dot="bg-emerald-400" />
             <div className="space-y-3">
               {ready.length === 0 ? (
                 <div className="border border-dashed rounded-xl p-6 text-center text-sm text-muted-foreground">Nothing ready yet</div>
