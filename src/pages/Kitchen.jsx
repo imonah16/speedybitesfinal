@@ -171,7 +171,14 @@ export default function Kitchen() {
   }, [loadOrders]);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
-    await base44.entities.Order.update(orderId, { status: newStatus });
+    // Optimistically update UI immediately
+    setOrders(prev =>
+      prev
+        .map(o => o.id === orderId ? { ...o, status: newStatus } : o)
+        .filter(o => ["pending", "preparing", "ready"].includes(o.status))
+    );
+    // Save in background
+    base44.entities.Order.update(orderId, { status: newStatus });
   };
 
   const pending = orders.filter(o => o.status === "pending");
