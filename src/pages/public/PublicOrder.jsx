@@ -141,8 +141,9 @@ export default function PublicOrder() {
     setSubmittingCash(true);
     const num = `ORD-${Date.now().toString(36).toUpperCase()}`;
     const wait = calcWaitTime();
-    await base44.entities.Order.create(buildOrderData(num, "cash"));
-    if (tableId) await base44.entities.RestaurantTable.update(tableId, { status: "occupied" });
+    const ops = [base44.entities.Order.create(buildOrderData(num, "cash"))];
+    if (tableId) ops.push(base44.entities.RestaurantTable.update(tableId, { status: "occupied" }));
+    await Promise.all(ops);
     setEstimatedWait(wait);
     setOrderNumber(num);
     setSubmitted(true);
