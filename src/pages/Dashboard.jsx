@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { 
-  DollarSign, ShoppingCart, Clock, CheckCircle2, 
+  PoundSterling, ShoppingCart, Clock, CheckCircle2, 
   TrendingUp, ArrowRight, ChefHat 
 } from "lucide-react";
 import StatCard from "../components/StatCard";
@@ -61,7 +61,7 @@ export default function Dashboard() {
           value={`£${todayRevenue.toFixed(2)}`}
           subtitle={`${todayOrders.length} orders today`}
 
-          icon={DollarSign}
+          icon={PoundSterling}
           trend="up"
         />
         <StatCard
