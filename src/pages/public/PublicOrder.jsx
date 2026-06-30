@@ -42,7 +42,7 @@ export default function PublicOrder() {
       setAppliedDiscount(PROMO_CODES[code]);
       setPromoError("");
     } else {
-      setPromoError("Invalid promo code. Try NHS15 or STUDENT10.");
+      setPromoError("Invalid promo code.");
       setAppliedDiscount(null);
     }
   };
