@@ -372,7 +372,7 @@ export default function PublicOrder() {
                   value={promoCode}
                   onChange={e => { setPromoCode(e.target.value); setPromoError(""); }}
                   onKeyDown={e => e.key === "Enter" && applyPromo()}
-                  placeholder="e.g. NHS15 (15% off) or STUDENT10 (10% off)"
+                  placeholder="Enter promo code"
                   className={promoError ? "border-destructive" : ""}
                 />
                 <Button type="button" variant="outline" size="sm" onClick={applyPromo} className="shrink-0">Apply</Button>
